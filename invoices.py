@@ -12,7 +12,7 @@ import os
 
 #view deo
 sg.theme("DarkTeal2")
-layout = [[sg.T("")], [sg.Text("Izeberi csv fajl: "), sg.Input(), sg.FileBrowse(key="-IN-")], [sg.Text("Naziv pdf fajla: "), sg.Input(key='-IN2-')], [sg.Button("Submit")]]
+layout = [[sg.T("")], [sg.Text("Izeberi csv fajl: "), sg.Input(), sg.FileBrowse(key="-IN-")], [sg.Text("Naziv pdf fajla: "), sg.Input(key='-IN2-')], [sg.Button("Kreiraj pdf")]]
 
 ###Building Window
 window = sg.Window('My File Browser', layout, size=(600,150))
@@ -38,11 +38,43 @@ while True:
     line5 = 'jos teksta'
     line6 = 'jos teksta'
 
+    elements = []
+
+    # PDF Text
+    # PDF Text - Styles
+    styles = getSampleStyleSheet()
+    styleNormal = styles['Normal']
+
+    elements.append(Paragraph(line1, styleNormal))
+    elements.append(Paragraph(line2, styleNormal))
+    elements.append(Paragraph(line3, styleNormal))
+    elements.append(Spacer(inch, .25 * inch))
+    elements.append(Paragraph(line4, styleNormal))
+    elements.append(Paragraph(line5, styleNormal))
+    elements.append(Paragraph(line6, styleNormal))
+    elements.append(Spacer(inch, .25 * inch))
+
     # File that must be written to report
     with open (path, 'r', encoding = 'utf-8') as csvfile:
         data = list(csv.reader(csvfile))
+        # PDF Table - Strip '[]() and add word wrap to column 5
+        for index, row in enumerate(data):
+            for col, val in enumerate(row):
+                """ if col != 5 or index == 0:
+                    data[index][col] = val.strip("'[]()")
+                else: """
+                data[index][col] = val.strip("'[]()")
+                data[index][col] = Paragraph(val, styles['Normal'])
+        data1 = data[0:7]
+        data2 = data[7:14]
+        data3 = data[14:21]
+        data4 = data[21:]
+        print("DATA1 ", data1)
+        print("")
+        print("")
+        print("")
+        print("DATA2 ", data2)
 
-    print(data)
     elements = []
 
     # PDF Text
@@ -89,7 +121,7 @@ while True:
     column22 = [(22, 0), (22, -1)]
     #column23 = [(23, 0), (23, -1)]
 
-    table_style = TableStyle([
+    table_style1 = TableStyle([
         ('VALIGN', all_cells[0], all_cells[1], 'TOP'),
         ('LINEBELOW', header[0], header[1], 1, colors.black),
         ('ALIGN', column0[0], column0[1], 'LEFT'),
@@ -99,6 +131,8 @@ while True:
         ('ALIGN', column4[0], column4[1], 'RIGHT'),
         ('ALIGN', column5[0], column5[1], 'LEFT'),
         ('ALIGN', column6[0], column6[1], 'RIGHT'),
+    ])
+    table_style2 = TableStyle([
         ('ALIGN', column7[0], column7[1], 'RIGHT'),
         ('ALIGN', column8[0], column8[1], 'RIGHT'),
         ('ALIGN', column9[0], column9[1], 'RIGHT'),
@@ -106,6 +140,8 @@ while True:
         ('ALIGN', column11[0], column11[1], 'RIGHT'),
         ('ALIGN', column12[0], column12[1], 'RIGHT'),
         ('ALIGN', column13[0], column13[1], 'RIGHT'),
+    ])
+    table_style3 = TableStyle([
         ('ALIGN', column14[0], column14[1], 'RIGHT'),
         ('ALIGN', column15[0], column15[1], 'RIGHT'),
         ('ALIGN', column16[0], column16[1], 'RIGHT'),
@@ -113,9 +149,10 @@ while True:
         ('ALIGN', column18[0], column18[1], 'RIGHT'),
         ('ALIGN', column19[0], column19[1], 'RIGHT'),
         ('ALIGN', column20[0], column20[1], 'RIGHT'),
+    ])
+    table_style4 = TableStyle([
         ('ALIGN', column21[0], column21[1], 'RIGHT'),
         ('ALIGN', column22[0], column22[1], 'RIGHT'),
-        #('ALIGN', column23[0], column23[1], 'RIGHT'),
     ])
 
     # PDF Table - Column Widths
@@ -146,25 +183,27 @@ while True:
         #2 * inch,  # Column 23
     ]
 
-    # PDF Table - Strip '[]() and add word wrap to column 5
-    for index, row in enumerate(data):
-        for col, val in enumerate(row):
-            """ if col != 5 or index == 0:
-                data[index][col] = val.strip("'[]()")
-            else: """
-            print("col ", col)
-            print("val ", val)
-            data[index][col] = Paragraph(val, styles['Normal'])
-
     # Add table to elements
-    t = Table(data, colWidths=colWidths)
-    t.setStyle(table_style)
-    elements.append(t)
+    t1 = Table(data1, colWidths=colWidths)
+    t1.setStyle(table_style1)
+    elements.append(t1)
+
+    t2 = Table(data2, colWidths=colWidths)
+    t2.setStyle(table_style2)
+    elements.append(t2)
+
+    """ t3 = Table(data3, colWidths=colWidths)
+    t3.setStyle(table_style3)
+    elements.append(t3)
+
+    t4 = Table(data4, colWidths=colWidths)
+    t4.setStyle(table_style4)
+    elements.append(t4) """
 
     # Generate PDF
     archivo_pdf = SimpleDocTemplate(
         name,
-        pagesize=letter,
+        pagesize=landscape(A4),
         rightMargin=40,
         leftMargin=40,
         topMargin=40,
@@ -172,6 +211,6 @@ while True:
 
     if event == sg.WIN_CLOSED:
             break
-    elif event == "Submit":
+    elif event == "Kreiraj pdf":
         archivo_pdf.build(elements)
         #print(values["-IN-"])
